@@ -1,13 +1,3 @@
-//
-// ================================================
-// | Grafica pe calculator                        |
-// ================================================
-// | Laboratorul X - 10_01_Shader.frag |
-// =====================================
-// 
-//  Shaderul de fragment / Fragment shader - afecteaza culoarea pixelilor;
-//
-
 
 #version 330 core
 

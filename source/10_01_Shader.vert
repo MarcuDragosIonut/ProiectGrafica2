@@ -1,12 +1,4 @@
-//
-// ================================================
-// | Grafica pe calculator                        |
-// ================================================
-// | Laboratorul X - 10_01_Shader.vert |
-// =====================================
-// 
-//  Shaderul de varfuri / Vertex shader - afecteaza geometria scenei; 
- 
+
  #version 330 core
 
 
