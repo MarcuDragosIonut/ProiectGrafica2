@@ -9,6 +9,7 @@
 #include <GL/freeglut.h>
 
 #include "Ground.h"
+#include "House.h"
 #include "Model.h"
 #include "Shader.h"
 
@@ -16,12 +17,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-
-
 GLuint
         VaoId,
         VboId,
-        nrVertLocation,
         myMatrixLocation,
         viewLocation,
         projLocation,
@@ -38,14 +36,10 @@ constexpr int screenWidth = 1600;
 constexpr int screenHeight = 900;
 
 Shader *shader;
-Model *casa;
+Model *houseModel;
 
 Ground *ground;
-
-std::vector<GLuint> VaoIds, VboIds;
-
-// Vectori pentru varfuri, coordonate de texturare, normale
-std::vector<std::vector<glm::vec3> > caseVector;
+std::vector<House *> houses{};
 
 // Matrice utilizate
 glm::mat4 myMatrix;
@@ -67,61 +61,6 @@ float umbraOffsetX = 0.f, umbraOffsetY = 0.f;
 
 // umbra
 float matrUmbra[4][4];
-
-void CreateVBO(int VaoIndex, std::vector<glm::vec3> &vert)
-{
-    // Generare VAO;
-    glGenVertexArrays(1, &VaoIds[VaoIndex]);
-    glBindVertexArray(VaoIds[VaoIndex]);
-
-    glGenBuffers(1, &VboIds[VaoIndex]);
-    glBindBuffer(GL_ARRAY_BUFFER, VboIds[VaoIndex]);
-    glBufferData(GL_ARRAY_BUFFER, vert.size() * sizeof(glm::vec3) + casa->normals.size() * sizeof(glm::vec3), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, vert.size() * sizeof(glm::vec3), &vert[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vert.size() * sizeof(glm::vec3), casa->normals.size() * sizeof(glm::vec3), &casa->normals[0]);
-
-    glEnableVertexAttribArray(0); // atributul 0 = pozitie
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *) 0);
-    glEnableVertexAttribArray(1); // atributul 1 = normale
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *) (vert.size() * sizeof(glm::vec3)));
-}
-
-void Initialize()
-{
-    // Crearea VBO / shadere-lor
-
-    std::random_device rd;
-    std::mt19937_64 mt(rd());
-    std::uniform_real_distribution<float> dist(-3.0, 3.0);
-    float zOffset = 1.5f;
-    for (int vaoIndex = 0; vaoIndex < nrCase; vaoIndex++)
-    {
-        VaoIds.push_back(0);
-        VboIds.push_back(0);
-        std::vector<glm::vec3> newVertices = casa->vertices;
-        caseVector.push_back(newVertices);
-        std::cout << caseVector.size() << '\n';
-        float xOffset = dist(mt);
-        for (int i = 0; i < casa->vertices.size(); i++)
-        {
-            caseVector[vaoIndex][i][0] += xOffset;
-            caseVector[vaoIndex][i][2] += zOffset - (float) vaoIndex * 1.1f;
-        }
-        CreateVBO(vaoIndex, caseVector[vaoIndex]);
-    }
-
-    // Locatii ptr shader
-    nrVertLocation = shader->GetUniform("nrVertices");
-    myMatrixLocation = shader->GetUniform("myMatrix");
-    viewLocation = shader->GetUniform("view");
-    projLocation = shader->GetUniform("projection");
-    codColLocation = shader->GetUniform("codCol");
-    matrUmbraLocation = shader->GetUniform("matrUmbra");
-    xLLocation = shader->GetUniform("xL");
-    yLLocation = shader->GetUniform("yL");
-    zLLocation = shader->GetUniform("zL");
-    fCeataLocation = shader->GetUniform("fCeata");
-}
 
 void RenderFunction(void)
 {
@@ -182,33 +121,11 @@ void RenderFunction(void)
     matrUmbra[3][3] = zL;
     glUniformMatrix4fv(matrUmbraLocation, 1, GL_FALSE, &matrUmbra[0][0]);
 
-
-    glUniform1i(codColLocation, 1);
-
-    // Legarea VAO, desenare;
-    for (int indexCasa = 0; indexCasa < nrCase; indexCasa++)
-    {
-        glBindVertexArray(VaoIds[indexCasa]);
-        glBindBuffer(GL_ARRAY_BUFFER, VboIds[indexCasa]);
-        glEnableVertexAttribArray(0); // atributul 0 = pozitie
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *) 0);
-        glDrawArrays(GL_TRIANGLES, 0, casa->vertices.size());
-    }
-
-
     ground->Render();
-
-    glUniform1i(codColLocation, 0);
-
-    for (int indexCasa = 0; indexCasa < nrCase; indexCasa++)
+    for (const auto house : houses)
     {
-        glBindVertexArray(VaoIds[indexCasa]);
-        glBindBuffer(GL_ARRAY_BUFFER, VboIds[indexCasa]);
-        glEnableVertexAttribArray(0); // atributul 0 = pozitie
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *) 0);
-        glDrawArrays(GL_TRIANGLES, 0, casa->vertices.size());
+        house->Render();
     }
-
 
     glutSwapBuffers();
     glFlush();
@@ -218,14 +135,30 @@ void init()
 {
     glClearColor(0.95f, 0.82f, 0.4f, 1.0f);
     shader = new Shader("MainShader.vert", "MainShader.frag");
-    casa = new Model("casa.obj");
+    houseModel = new Model("casa.obj");
 
-    Initialize();
+    myMatrixLocation = shader->GetUniform("myMatrix");
+    viewLocation = shader->GetUniform("view");
+    projLocation = shader->GetUniform("projection");
+    codColLocation = shader->GetUniform("codCol");
+    matrUmbraLocation = shader->GetUniform("matrUmbra");
+    xLLocation = shader->GetUniform("xL");
+    yLLocation = shader->GetUniform("yL");
+    zLLocation = shader->GetUniform("zL");
+    fCeataLocation = shader->GetUniform("fCeata");
 }
 
 void createObjects()
 {
     ground = new Ground(1500, shader);
+
+    std::random_device rd;
+    std::mt19937_64 mt(rd());
+    std::uniform_real_distribution<float> dist(-3.0, 3.0);
+    for (int vaoIndex = 0; vaoIndex < nrCase; vaoIndex++)
+    {
+        houses.push_back(new House(houseModel, dist(mt), 1.5f - static_cast<float>(vaoIndex) * 1.1f, shader));
+    }
 }
 
 void render()
@@ -305,7 +238,7 @@ void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]]
 void close()
 {
     delete shader;
-    delete casa;
+    delete houseModel;
     delete ground;
 }
 

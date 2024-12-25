@@ -13,6 +13,11 @@ Ground::Ground(const GLfloat stretch, const Shader *shader) : RenderedObject(sha
     };
 
     glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), _vertexBuffer, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
 }
 
 Ground::~Ground()
