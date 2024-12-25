@@ -11,28 +11,36 @@ RenderedObject::~RenderedObject()
 
     glDeleteVertexArrays(1, &_vaoId);
     glDeleteBuffers(1, &_vboId);
-    glDeleteBuffers(1, &_eboId);
 }
 
 void RenderedObject::Create()
 {
+    while (colors.size() < vertices.size()) colors.push_back(glm::vec3(0, 0, 0));
+    while (normals.size() < vertices.size()) normals.push_back(glm::vec3(0, 0, 0));
+
+    if (colors.size() > vertices.size()) colors.resize(vertices.size());
+    if (normals.size() > vertices.size()) normals.resize(vertices.size());
+
     glGenVertexArrays(1, &_vaoId);
     glBindVertexArray(_vaoId);
 
     glGenBuffers(1, &_vboId);
     glBindBuffer(GL_ARRAY_BUFFER, _vboId);
 
-    glGenBuffers(1, &_eboId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _eboId);
+    const int subDataSize = sizeof(glm::vec3) * vertices.size();
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * (vertices.size() + normals.size()), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * vertices.size(), &vertices[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * vertices.size(), sizeof(glm::vec3) * normals.size(), &normals[0]);
+    glBufferData(GL_ARRAY_BUFFER, subDataSize * 3, nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, subDataSize * 0, subDataSize, &vertices[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, subDataSize * 1, subDataSize, &colors[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, subDataSize * 2, subDataSize, &normals[0]);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), reinterpret_cast<GLvoid *>(sizeof(glm::vec3) * vertices.size()));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), reinterpret_cast<GLvoid *>(subDataSize * 0));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), reinterpret_cast<GLvoid *>(subDataSize * 1));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), reinterpret_cast<GLvoid *>(subDataSize * 2));
 
     _created = true;
 }

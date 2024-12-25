@@ -3,12 +3,16 @@
 #include <string>
 #include <GL/glew.h>
 
-struct Shader
+class Shader
 {
-    GLuint program;
+    GLuint _program;
+
+public:
+    [[nodiscard]] GLint GetUniform(const std::string &name) const; // TODO: should be private
 
     Shader(const char *vert, const char *frag);
     ~Shader();
 
-    [[nodiscard]] GLint GetUniform(const std::string &name) const;
+    void Reset() const;
+    void SetShadow(bool shadow) const;
 };

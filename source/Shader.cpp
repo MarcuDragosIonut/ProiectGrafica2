@@ -10,21 +10,31 @@ std::map<std::string, GLint> locations{};
 
 Shader::Shader(const char *vert, const char *frag)
 {
-    program = LoadShaders(vert, frag);
-    glUseProgram(program);
+    _program = LoadShaders(vert, frag);
+    glUseProgram(_program);
 }
 
 Shader::~Shader()
 {
-    glDeleteProgram(program);
+    glDeleteProgram(_program);
 }
 
 GLint Shader::GetUniform(const std::string &name) const
 {
     if (locations.find(name) == locations.end())
     {
-        locations[name] = glGetUniformLocation(program, name.c_str());
+        locations[name] = glGetUniformLocation(_program, name.c_str());
     }
 
     return locations[name];
+}
+
+void Shader::Reset() const
+{
+    SetShadow(false);
+}
+
+void Shader::SetShadow(const bool shadow) const
+{
+    glUniform1i(GetUniform("isShadow"), shadow);
 }

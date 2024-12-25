@@ -18,17 +18,13 @@
 #include "glm/gtc/type_ptr.hpp"
 
 GLuint
-        VaoId,
-        VboId,
         myMatrixLocation,
         viewLocation,
         projLocation,
-        codColLocation,
         matrUmbraLocation,
         xLLocation,
         yLLocation,
-        zLLocation,
-        fCeataLocation;
+        zLLocation;
 
 float PI = 3.141592;
 
@@ -70,12 +66,10 @@ void init()
     myMatrixLocation = shader->GetUniform("myMatrix");
     viewLocation = shader->GetUniform("view");
     projLocation = shader->GetUniform("projection");
-    codColLocation = shader->GetUniform("codCol");
     matrUmbraLocation = shader->GetUniform("matrUmbra");
     xLLocation = shader->GetUniform("xL");
     yLLocation = shader->GetUniform("yL");
     zLLocation = shader->GetUniform("zL");
-    fCeataLocation = shader->GetUniform("fCeata");
 }
 
 void createObjects()
@@ -96,6 +90,8 @@ void render()
    // Initializare ecran + test de adancime;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+
+    shader->Reset();
 
     // Matricea de modelare
     myMatrix = glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 1.0, 0.0))
@@ -118,10 +114,6 @@ void render()
     // Proiectie;
     projection = glm::infinitePerspective(GLfloat(fov), GLfloat(width) / GLfloat(height), dNear);
     glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
-
-    // ceata
-    float fCeataArg = 0.01;
-    glUniform1f(fCeataLocation, std::exp(-fCeataArg * (refZ + dist)));
 
     // matricea pentru umbra
     float D = -0.01f, xL = 300.f + umbraOffsetX, yL = -400.f + umbraOffsetY, zL = 400.f;

@@ -17,13 +17,13 @@ Ground::Ground(const GLfloat stretch, const Shader *shader) : RenderedObject(sha
         {0, 0, 1},
         {0, 0, 1}
     };
+
+    colors = std::vector(vertices.size(), glm::vec3(0.8f, 0.6f, 0.1f));
 }
 
 void Ground::Render()
 {
     RenderedObject::Render();
-
-    glUniform1i(shader->GetUniform("codCol"), 2);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }

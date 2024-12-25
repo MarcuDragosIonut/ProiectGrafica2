@@ -10,6 +10,8 @@ House::House(const Model *model, const float xOffset, const float zOffset, const
         vertices[i].x += xOffset;
         vertices[i].z += zOffset;
     }
+
+    colors = std::vector(vertices.size(), glm::vec3(0.59f, 0.29f, 0.0f));
 }
 
 void House::Render()
