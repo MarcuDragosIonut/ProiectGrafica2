@@ -55,16 +55,45 @@ float alpha = 0.0f, beta = 0.0f, dist = 6.0f,
         incrAlpha1 = 0.01, incrAlpha2 = 0.01;
 //	Elemente pentru matricea de proiectie;
 float width = 800, height = 600, dNear = 0.1f, fov = 60.f * PI / 180;
-int nrCase = 4;
 
 float umbraOffsetX = 0.f, umbraOffsetY = 0.f;
 
 // umbra
 float matrUmbra[4][4];
 
-void RenderFunction(void)
+void init()
 {
-    // Initializare ecran + test de adancime;
+    glClearColor(0.95f, 0.82f, 0.4f, 1.0f);
+    shader = new Shader("MainShader.vert", "MainShader.frag");
+    houseModel = new Model("casa.obj");
+
+    myMatrixLocation = shader->GetUniform("myMatrix");
+    viewLocation = shader->GetUniform("view");
+    projLocation = shader->GetUniform("projection");
+    codColLocation = shader->GetUniform("codCol");
+    matrUmbraLocation = shader->GetUniform("matrUmbra");
+    xLLocation = shader->GetUniform("xL");
+    yLLocation = shader->GetUniform("yL");
+    zLLocation = shader->GetUniform("zL");
+    fCeataLocation = shader->GetUniform("fCeata");
+}
+
+void createObjects()
+{
+    ground = new Ground(1500, shader);
+
+    std::random_device rd;
+    std::mt19937_64 mt(rd());
+    std::uniform_real_distribution<float> dist(-3.0, 3.0);
+    for (int i = 0; i < 4; i++)
+    {
+        houses.push_back(new House(houseModel, dist(mt), 1.5f - static_cast<float>(i) * 1.1f, shader));
+    }
+}
+
+void render()
+{
+   // Initializare ecran + test de adancime;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
@@ -129,41 +158,6 @@ void RenderFunction(void)
 
     glutSwapBuffers();
     glFlush();
-}
-
-void init()
-{
-    glClearColor(0.95f, 0.82f, 0.4f, 1.0f);
-    shader = new Shader("MainShader.vert", "MainShader.frag");
-    houseModel = new Model("casa.obj");
-
-    myMatrixLocation = shader->GetUniform("myMatrix");
-    viewLocation = shader->GetUniform("view");
-    projLocation = shader->GetUniform("projection");
-    codColLocation = shader->GetUniform("codCol");
-    matrUmbraLocation = shader->GetUniform("matrUmbra");
-    xLLocation = shader->GetUniform("xL");
-    yLLocation = shader->GetUniform("yL");
-    zLLocation = shader->GetUniform("zL");
-    fCeataLocation = shader->GetUniform("fCeata");
-}
-
-void createObjects()
-{
-    ground = new Ground(1500, shader);
-
-    std::random_device rd;
-    std::mt19937_64 mt(rd());
-    std::uniform_real_distribution<float> dist(-3.0, 3.0);
-    for (int vaoIndex = 0; vaoIndex < nrCase; vaoIndex++)
-    {
-        houses.push_back(new House(houseModel, dist(mt), 1.5f - static_cast<float>(vaoIndex) * 1.1f, shader));
-    }
-}
-
-void render()
-{
-    RenderFunction();
 }
 
 void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe_unused]] const int y)
