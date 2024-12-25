@@ -7,16 +7,17 @@ layout (location = 2) in vec3 in_Normal;
 out vec3 st_Color;
 out vec3 st_FragPos;
 
+
 // TODO \/
 out vec3 Normal;
 out vec3 inLightPos;
 out vec3 inViewPos;
 
+uniform bool isShadow;
 uniform mat4 myMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 matrUmbra;
-uniform int codCol;
 uniform float xL, yL, zL;
 
 vec3 viewPos = vec3(3, 2, 1);
@@ -25,7 +26,7 @@ vec3 viewPos = vec3(3, 2, 1);
 void main(void)
 {
     // TODO \/
-    if (codCol > 0) {
+    if (!isShadow) {
         gl_Position = projection * view * myMatrix * vec4(in_Position, 1.0);
     }
     else {

@@ -3,6 +3,7 @@
 in vec3 st_Color;
 in vec3 st_FragPos;
 
+
 // TODO \/
 in vec3 Normal;
 in vec3 inLightPos;
@@ -10,13 +11,13 @@ in vec3 inViewPos;
 
 out vec4 out_Color;
 
-uniform int codCol;
+uniform bool isShadow;
 
 vec3 lightColor = vec3(0.7, 0.9, 0.6);
 
 void main(void)
 {
-    if (codCol > 0) {
+    if (!isShadow) {
         //  Ambient;
         float ambientStrength = 0.4f;
         vec3 ambient_light = ambientStrength * lightColor;
@@ -43,7 +44,7 @@ void main(void)
         vec3 result = emission + (ambient_term + diffuse_term + specular_term);
         out_Color = vec4(result, 1.0f);
     }
-    if (codCol == 0) {
+    if (isShadow) {
         out_Color = vec4(vec3(0.0, 0.0, 0.0), 1.0);
     }
 }
