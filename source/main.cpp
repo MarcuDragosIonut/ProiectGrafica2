@@ -17,6 +17,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+// TODO v
 GLuint
         myMatrixLocation,
         viewLocation,
@@ -27,6 +28,7 @@ GLuint
         zLLocation;
 
 float PI = 3.141592;
+// TODO ^
 
 constexpr int screenWidth = 1600;
 constexpr int screenHeight = 900;
@@ -37,6 +39,7 @@ Model *houseModel;
 Ground *ground;
 std::vector<House *> houses{};
 
+// TODO v
 // Matrice utilizate
 glm::mat4 myMatrix;
 glm::mat4 view;
@@ -56,13 +59,15 @@ float umbraOffsetX = 0.f, umbraOffsetY = 0.f;
 
 // umbra
 float matrUmbra[4][4];
+// TODO ^
 
 void init()
 {
     glClearColor(0.95f, 0.82f, 0.4f, 1.0f);
     shader = new Shader("MainShader.vert", "MainShader.frag");
-    houseModel = new Model("casa.obj");
+    houseModel = new Model("House.obj");
 
+    // TODO v
     myMatrixLocation = shader->GetUniform("myMatrix");
     viewLocation = shader->GetUniform("view");
     projLocation = shader->GetUniform("projection");
@@ -70,6 +75,7 @@ void init()
     xLLocation = shader->GetUniform("xL");
     yLLocation = shader->GetUniform("yL");
     zLLocation = shader->GetUniform("zL");
+    // TODO ^
 }
 
 void createObjects()
@@ -87,11 +93,12 @@ void createObjects()
 
 void render()
 {
-   // Initializare ecran + test de adancime;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
     shader->Reset();
+
+    // TODO v
 
     // Matricea de modelare
     myMatrix = glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 1.0, 0.0))
@@ -142,6 +149,8 @@ void render()
     matrUmbra[3][3] = zL;
     glUniformMatrix4fv(matrUmbraLocation, 1, GL_FALSE, &matrUmbra[0][0]);
 
+    // TODO ^
+
     ground->Render();
     for (const auto house : houses)
     {
@@ -154,6 +163,7 @@ void render()
 
 void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe_unused]] const int y)
 {
+    // TODO v
     switch (key)
     {
         case '-':
@@ -179,12 +189,12 @@ void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe
         default:
             break;
     }
-    if (key == 27)
-        exit(0);
+    // TODO ^
 }
 
 void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]] const int y)
 {
+    // TODO v
     switch (key)
     {
         case GLUT_KEY_LEFT:
@@ -219,6 +229,7 @@ void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]]
         default:
             break;
     }
+    // TODO ^
 }
 
 void close()

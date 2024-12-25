@@ -3,7 +3,7 @@ project(OpenGLTemplate CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-file(GLOB sources ${CMAKE_CURRENT_SOURCE_DIR}/INCLUDE/GLM/DETAIL/glm.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SRC/* ${CMAKE_CURRENT_SOURCE_DIR}/source/*)
+file(GLOB sources ${CMAKE_CURRENT_SOURCE_DIR}/INCLUDE/GLM/DETAIL/glm.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SRC/* ${CMAKE_CURRENT_SOURCE_DIR}/source/**)
 list(FILTER sources EXCLUDE REGEX ".*\\.obj$")
 
 add_executable(opengl-template ${sources})
@@ -19,13 +19,13 @@ endif()
 target_include_directories(opengl-template PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/INCLUDE)
 target_link_libraries(opengl-template PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/LIB/x64/GL/freeglut.lib ${CMAKE_CURRENT_SOURCE_DIR}/LIB/x64/GL/glew32.lib ${CMAKE_CURRENT_SOURCE_DIR}/LIB/x64/GL/glew32s.lib ${CMAKE_CURRENT_SOURCE_DIR}/LIB/x64/SOIL/SOIL.lib)
 
-file(GLOB shaders ${CMAKE_CURRENT_SOURCE_DIR}/source/*.frag ${CMAKE_CURRENT_SOURCE_DIR}/source/*.vert ${CMAKE_CURRENT_SOURCE_DIR}/source/*.png ${CMAKE_CURRENT_SOURCE_DIR}/source/*.obj ${CMAKE_CURRENT_SOURCE_DIR}/source/*.mtl)
-foreach(shader ${shaders})
-    get_filename_component(shader_name ${shader} NAME)
+file(GLOB resources ${CMAKE_CURRENT_SOURCE_DIR}/source/resources/*)
+foreach(resource ${resources})
+    get_filename_component(resource_name ${resource} NAME)
     add_custom_command(TARGET opengl-template POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${shader}
-        $<TARGET_FILE_DIR:opengl-template>/${shader_name})
+        ${resource}
+        $<TARGET_FILE_DIR:opengl-template>/${resource_name})
 endforeach()
 
 add_custom_command(TARGET opengl-template POST_BUILD
