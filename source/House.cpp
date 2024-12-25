@@ -21,6 +21,9 @@ void House::Render()
     shader->SetShadow(false);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
+
+
     shader->SetShadow(true);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
 }

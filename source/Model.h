@@ -13,4 +13,6 @@ public:
 
     explicit Model(const char *file);
     ~Model();
+private:
+    void averageNormals();
 };

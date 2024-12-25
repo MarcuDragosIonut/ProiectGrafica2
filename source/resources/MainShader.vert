@@ -36,7 +36,7 @@ void main(void)
     // TODO v
     gl_Position = projection * view * myMatrix * vec4(in_Position, 1.0);
     Normal = vec3(projection * view * vec4(in_Normal, 0.0));
-    inLightPos = vec3(projection * view * myMatrix * vec4(xL, yL, zL, 1.0f));
+    inLightPos = vec3(projection * view * myMatrix * vec4(xL, yL, zL, 1.0f)); // sursa punctuala
     inViewPos = vec3(projection * view * vec4(viewPos, 1.0f));
     // TODO ^
 

@@ -23,6 +23,7 @@ GLuint
         viewLocation,
         projLocation,
         matrUmbraLocation,
+        shadowStrengthLocation,
         xLLocation,
         yLLocation,
         zLLocation;
@@ -55,46 +56,48 @@ float alpha = 0.0f, beta = 0.0f, dist = 6.0f,
 //	Elemente pentru matricea de proiectie;
 float width = 800, height = 600, dNear = 0.1f, fov = 60.f * PI / 180;
 
-float umbraOffsetX = 0.f, umbraOffsetY = 0.f;
+float timeOfDay = 8.f, daySplit = 24.f, dayStep = 0.25f,
+        radius = 1000.f; // cat de departe e sursa de lumina (soarele) de scena
 
 // umbra
 float matrUmbra[4][4];
 // TODO ^
 
-void init()
-{
+void init() {
     glClearColor(0.95f, 0.82f, 0.4f, 1.0f);
     shader = new Shader("MainShader.vert", "MainShader.frag");
-    houseModel = new Model("House.obj");
+    houseModel = new Model("Cub.obj");
 
     // TODO v
     myMatrixLocation = shader->GetUniform("myMatrix");
     viewLocation = shader->GetUniform("view");
     projLocation = shader->GetUniform("projection");
     matrUmbraLocation = shader->GetUniform("matrUmbra");
+    shadowStrengthLocation = shader->GetUniform("shadowStrength");
     xLLocation = shader->GetUniform("xL");
     yLLocation = shader->GetUniform("yL");
     zLLocation = shader->GetUniform("zL");
     // TODO ^
 }
 
-void createObjects()
-{
+void createObjects() {
     ground = new Ground(1500, shader);
 
     std::random_device rd;
     std::mt19937_64 mt(rd());
     std::uniform_real_distribution<float> dist(-3.0, 3.0);
-    for (int i = 0; i < 4; i++)
-    {
+    for (int i = 0; i < 4; i++) {
         houses.push_back(new House(houseModel, dist(mt), 1.5f - static_cast<float>(i) * 1.1f, shader));
     }
 }
 
-void render()
-{
+void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+
+    // Pentru alpha value la culori
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     shader->Reset();
 
@@ -122,10 +125,24 @@ void render()
     projection = glm::infinitePerspective(GLfloat(fov), GLfloat(width) / GLfloat(height), dNear);
     glUniformMatrix4fv(projLocation, 1, GL_FALSE, &projection[0][0]);
 
-    // matricea pentru umbra
-    float D = -0.01f, xL = 300.f + umbraOffsetX, yL = -400.f + umbraOffsetY, zL = 400.f;
 
-    std::cout << umbraOffsetX << ' ' << umbraOffsetY << '\n';
+    float
+    // Coordonate directie lumina
+    xL = 500.f, yL = 300.f, zL = 400.f,
+    // offset Umbra
+    D = -0.01f;
+
+    // Simulare soare
+
+    float daytimeElapsed = timeOfDay / daySplit;
+    float sunAngle = daytimeElapsed * 2.0f * PI;
+
+    yL = std::sin(sunAngle) * radius/2 + radius/2;
+    xL = radius * cos(sunAngle);
+    zL = radius * sin(sunAngle);
+
+    float shadowStrength = 4 * daytimeElapsed * (1 - daytimeElapsed);
+    shadowStrength = 1.f; // TODO
 
     glUniform1f(xLLocation, xL);
     glUniform1f(yLLocation, yL);
@@ -147,13 +164,13 @@ void render()
     matrUmbra[3][1] = -D * yL;
     matrUmbra[3][2] = -D * zL;
     matrUmbra[3][3] = zL;
+    glUniform1f(shadowStrengthLocation, shadowStrength);
     glUniformMatrix4fv(matrUmbraLocation, 1, GL_FALSE, &matrUmbra[0][0]);
 
     // TODO ^
 
     ground->Render();
-    for (const auto house : houses)
-    {
+    for (const auto house: houses) {
         house->Render();
     }
 
@@ -161,11 +178,10 @@ void render()
     glFlush();
 }
 
-void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe_unused]] const int y)
-{
+void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe_unused]] const int y) {
+    int a = 22;
     // TODO v
-    switch (key)
-    {
+    switch (key) {
         case '-':
             dist -= 0.25;
             break;
@@ -174,16 +190,12 @@ void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe
             break;
 
         case 'a':
-            umbraOffsetX -= 10.f;
+            timeOfDay += dayStep;
+            if (timeOfDay > daySplit) timeOfDay = 0.f;
             break;
         case 'd':
-            umbraOffsetX += 10.f;
-            break;
-        case 'w':
-            umbraOffsetY += 10.f;
-            break;
-        case 's':
-            umbraOffsetY -= 10.f;
+            timeOfDay -= dayStep;
+            if (timeOfDay < 0.f) timeOfDay = daySplit;
             break;
 
         default:
@@ -192,11 +204,9 @@ void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe
     // TODO ^
 }
 
-void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]] const int y)
-{
+void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]] const int y) {
     // TODO v
-    switch (key)
-    {
+    switch (key) {
         case GLUT_KEY_LEFT:
             beta -= 0.03;
             break;
@@ -205,23 +215,17 @@ void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]]
             break;
         case GLUT_KEY_UP:
             alpha += incrAlpha1;
-            if (abs(alpha - PI / 2) < 0.05)
-            {
+            if (abs(alpha - PI / 2) < 0.05) {
                 incrAlpha1 = 0.f;
-            }
-            else
-            {
+            } else {
                 incrAlpha1 = 0.03f;
             }
             break;
         case GLUT_KEY_DOWN:
             alpha -= incrAlpha2;
-            if (abs(alpha + PI / 2) < 0.05)
-            {
+            if (abs(alpha + PI / 2) < 0.05) {
                 incrAlpha2 = 0.f;
-            }
-            else
-            {
+            } else {
                 incrAlpha2 = 0.03f;
             }
             break;
@@ -232,15 +236,13 @@ void input_special(const int key, [[maybe_unused]] const int x, [[maybe_unused]]
     // TODO ^
 }
 
-void close()
-{
+void close() {
     delete shader;
     delete houseModel;
     delete ground;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(screenWidth, screenHeight);
