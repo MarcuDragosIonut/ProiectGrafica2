@@ -36,5 +36,5 @@ void Shader::Reset() const
 
 void Shader::SetShadow(const bool shadow) const
 {
-    glUniform1i(GetUniform("isShadow"), shadow);
+    glUniform1i(GetUniform("codCol"), !shadow);
 }

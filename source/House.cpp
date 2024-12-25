@@ -18,9 +18,9 @@ void House::Render()
 {
     RenderedObject::Render();
 
-    glUniform1i(shader->GetUniform("codCol"), 1);
+    shader->SetShadow(false);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
-    glUniform1i(shader->GetUniform("codCol"), 0);
+    shader->SetShadow(true);
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }
