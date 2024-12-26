@@ -6,7 +6,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(GLOB sources ${CMAKE_CURRENT_SOURCE_DIR}/INCLUDE/GLM/DETAIL/glm.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SRC/* ${CMAKE_CURRENT_SOURCE_DIR}/source/**)
 list(FILTER sources EXCLUDE REGEX ".*\\.obj$")
 
-add_executable(opengl-template ${sources})
+add_executable(opengl-template ${sources} source/Plane.cpp source/Plane.h)
 
 find_package(OpenGL REQUIRED)
 if (OpenGL_FOUND)

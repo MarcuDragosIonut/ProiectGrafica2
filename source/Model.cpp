@@ -37,7 +37,7 @@ void Model::averageNormals() {
     }
     for(auto &v: vertexIndexMap){
         for(auto &vertexIndex: v.second){
-            normals[vertexIndex] = glm::normalize(v.first);
+            normals[vertexIndex] = glm::normalize(individualNormals[v.first]);
         }
     }
 }

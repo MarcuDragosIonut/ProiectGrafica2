@@ -12,13 +12,13 @@ Ground::Ground(const GLfloat stretch, const Shader *shader) : RenderedObject(sha
     };
 
     normals = {
-        {0, 1, 0},
-        {0, 1, 0},
-        {0, 1, 0},
-        {0, 1, 0}
+        {0, -1, 0},
+        {0, -1, 0},
+        {0, -1, 0},
+        {0, -1, 0}
     };
 
-    colors = std::vector(vertices.size(), glm::vec3(0.8f, 0.6f, 0.1f));
+    colors = std::vector(vertices.size(), glm::vec3(56.f/255.f, 130.f/255.f, 120.f/255.f));
 }
 
 void Ground::Render()

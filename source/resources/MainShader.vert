@@ -14,7 +14,7 @@ out vec3 Normal;
 out vec3 inLightPos;
 out vec3 inViewPos;
 
-uniform mat4 myMatrix;
+uniform mat4 modelMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 matrUmbra;
@@ -28,15 +28,15 @@ void main(void)
     if (isShadow)
     {
         // TODO v
-        gl_Position = projection * view * matrUmbra * myMatrix * vec4(in_Position, 1.0);
+        gl_Position = projection * view * matrUmbra * modelMatrix * vec4(in_Position, 1.0);
         // TODO ^
         return;
     }
 
     // TODO v
-    gl_Position = projection * view * myMatrix * vec4(in_Position, 1.0);
+    gl_Position = projection * view * modelMatrix * vec4(in_Position, 1.0);
     Normal = vec3(projection * view * vec4(in_Normal, 0.0));
-    inLightPos = vec3(projection * view * myMatrix * vec4(xL, yL, zL, 1.0f)); // sursa punctuala
+    inLightPos = vec3(projection * view * modelMatrix * vec4(xL, yL, zL, 1.0f)); // sursa punctuala
     inViewPos = vec3(projection * view * vec4(viewPos, 1.0f));
     // TODO ^
 

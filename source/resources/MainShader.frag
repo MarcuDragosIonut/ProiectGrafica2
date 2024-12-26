@@ -26,7 +26,7 @@ void main()
 
     // TODO v
     //  Ambient;
-    float ambientStrength = 0.25f;
+    float ambientStrength = 0.28f;
     vec3 ambient_light = ambientStrength * lightColor;
     vec3 ambient_term = ambient_light * st_Color;
 
@@ -38,8 +38,8 @@ void main()
     vec3 diffuse_term = diff * diffuse_light * st_Color;
 
     //  Specular;
-    float specularStrength = 0.5f;
-    float shininess = 0.7f;
+    float specularStrength = 0.3f;
+    float shininess = 16.0f;
     vec3 viewDir = normalize(inViewPos);
     vec3 reflectDir = normalize(reflect(-lightDir, norm));
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);

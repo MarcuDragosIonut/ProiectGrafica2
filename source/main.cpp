@@ -10,6 +10,7 @@
 
 #include "Ground.h"
 #include "House.h"
+#include "Plane.h"
 #include "Model.h"
 #include "Shader.h"
 
@@ -19,7 +20,7 @@
 
 // TODO v
 GLuint
-        myMatrixLocation,
+        modelMatrixLocation,
         viewLocation,
         projLocation,
         matrUmbraLocation,
@@ -35,29 +36,30 @@ constexpr int screenWidth = 1600;
 constexpr int screenHeight = 900;
 
 Shader *shader;
-Model *houseModel;
+Model *houseModel, *planeModel;
 
 Ground *ground;
 std::vector<House *> houses{};
+Plane *plane;
 
 // TODO v
 // Matrice utilizate
-glm::mat4 myMatrix;
+glm::mat4 modelMatrix;
 glm::mat4 view;
 glm::mat4 projection;
 
 //	Elemente pentru matricea de vizualizare;
-float refX = 0.0f, refY = 0.0f, refZ = 0.0f,
+float refX = 0.0f, refY = 0.0f, refZ = 4.0f,
         obsX, obsY, obsZ,
         vX = 0.0f, vY = 0.0f, vZ = 1.0f;
 //	Elemente pentru deplasarea pe sfera;
 float alpha = 0.0f, beta = 0.0f, dist = 6.0f,
         incrAlpha1 = 0.01, incrAlpha2 = 0.01;
 //	Elemente pentru matricea de proiectie;
-float width = 800, height = 600, dNear = 0.1f, fov = 60.f * PI / 180;
+float width = screenWidth, height = screenHeight, dNear = 0.1f, fov = 60.f * PI / 180;
 
 float timeOfDay = 8.f, daySplit = 24.f, dayStep = 0.25f,
-        radius = 1000.f; // cat de departe e sursa de lumina (soarele) de scena
+        radius = 800.f; // cat de departe e sursa de lumina (soarele) de scena
 
 // umbra
 float matrUmbra[4][4];
@@ -66,10 +68,11 @@ float matrUmbra[4][4];
 void init() {
     glClearColor(0.95f, 0.82f, 0.4f, 1.0f);
     shader = new Shader("MainShader.vert", "MainShader.frag");
-    houseModel = new Model("Cub.obj");
+    houseModel = new Model("House.obj");
+    planeModel = new Model("Plane.obj");
 
     // TODO v
-    myMatrixLocation = shader->GetUniform("myMatrix");
+    modelMatrixLocation = shader->GetUniform("modelMatrix");
     viewLocation = shader->GetUniform("view");
     projLocation = shader->GetUniform("projection");
     matrUmbraLocation = shader->GetUniform("matrUmbra");
@@ -89,6 +92,8 @@ void createObjects() {
     for (int i = 0; i < 4; i++) {
         houses.push_back(new House(houseModel, dist(mt), 1.5f - static_cast<float>(i) * 1.1f, shader));
     }
+
+    plane = new Plane(planeModel, 0.f, 5.f, 0.f, shader);
 }
 
 void render() {
@@ -104,9 +109,9 @@ void render() {
     // TODO v
 
     // Matricea de modelare
-    myMatrix = glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 1.0, 0.0))
-               * glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 0.0, 1.0));
-    glUniformMatrix4fv(myMatrixLocation, 1, GL_FALSE, &myMatrix[0][0]);
+    modelMatrix = glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 1.0, 0.0))
+                  * glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 0.0, 1.0));
+    glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]);
 
     // Vizualizare;
     // Pozitia observatorului - se deplaseaza pe sfera;
@@ -141,6 +146,9 @@ void render() {
     xL = radius * cos(sunAngle);
     zL = radius * sin(sunAngle);
 
+    //  dezactiveaza efectul de soare
+    xL = 500.f, yL = 300.f, zL = 400.f;
+
     float shadowStrength = 4 * daytimeElapsed * (1 - daytimeElapsed);
     shadowStrength = 1.f; // TODO
 
@@ -173,6 +181,7 @@ void render() {
     for (const auto house: houses) {
         house->Render();
     }
+    plane->Render();
 
     glutSwapBuffers();
     glFlush();
@@ -189,15 +198,36 @@ void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe
             dist += 0.25;
             break;
 
-        case 'a':
+        case 'q':
             timeOfDay += dayStep;
             if (timeOfDay > daySplit) timeOfDay = 0.f;
             break;
-        case 'd':
+        case 'e':
             timeOfDay -= dayStep;
             if (timeOfDay < 0.f) timeOfDay = daySplit;
             break;
-
+        case 'w':
+            refY -= 2.f * sin(beta);
+            refX -= 2.f * cos(beta);
+            break;
+        case 's':
+            refY += 2.f * sin(beta);
+            refX += 2.f * cos(beta);
+            break;
+        case 'a':
+            refY -= 2.f * cos(beta);
+            refX += 2.f * sin(beta);
+            break;
+        case 'd':
+            refY += 2.f * cos(beta);
+            refX -= 2.f * sin(beta);
+            break;
+        case 'r':
+            refZ += 2.f * cos(alpha);
+            break;
+        case 'f':
+            refZ -= 2.f * cos(alpha);
+            break;
         default:
             break;
     }
