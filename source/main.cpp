@@ -25,6 +25,7 @@ GLuint
         projLocation,
         matrUmbraLocation,
         shadowStrengthLocation,
+        viewPosLocation,
         xLLocation,
         yLLocation,
         zLLocation;
@@ -58,8 +59,9 @@ float alpha = 0.0f, beta = 0.0f, dist = 6.0f,
 //	Elemente pentru matricea de proiectie;
 float width = screenWidth, height = screenHeight, dNear = 0.1f, fov = 60.f * PI / 180;
 
-float timeOfDay = 8.f, daySplit = 24.f, dayStep = 0.25f,
-        radius = 800.f; // cat de departe e sursa de lumina (soarele) de scena
+float timeOfDay = 8.f, daySplit = 24.f, dayStep = 0.25f, radius = 800.f; // cat de departe e sursa de lumina (soarele) de scena
+
+float xL_inc = 0.f, yL_inc= 0.f, zL_inc = 0.f;
 
 // umbra
 float matrUmbra[4][4];
@@ -77,6 +79,7 @@ void init() {
     projLocation = shader->GetUniform("projection");
     matrUmbraLocation = shader->GetUniform("matrUmbra");
     shadowStrengthLocation = shader->GetUniform("shadowStrength");
+    viewPosLocation = shader->GetUniform("viewPos");
     xLLocation = shader->GetUniform("xL");
     yLLocation = shader->GetUniform("yL");
     zLLocation = shader->GetUniform("zL");
@@ -111,6 +114,7 @@ void render() {
     // Matricea de modelare
     modelMatrix = glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 1.0, 0.0))
                   * glm::rotate(glm::mat4(1.0f), PI / 2, glm::vec3(0.0, 0.0, 1.0));
+    //modelMatrix = glm::mat4(1.0f);
     glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, &modelMatrix[0][0]);
 
     // Vizualizare;
@@ -120,6 +124,7 @@ void render() {
     obsZ = refZ + dist * sin(alpha);
     // Vectori pentru matricea de vizualizare;
     glm::vec3 obs = glm::vec3(obsX, obsY, obsZ); // Pozitia observatorului;
+    glUniform3f(viewPosLocation, obsX, obsY, obsZ);
     glm::vec3 pctRef = glm::vec3(refX, refY, refZ); // Pozitia punctului de referinta;
     glm::vec3 vert = glm::vec3(vX, vY, vZ); // Verticala din planul de vizualizare;
     // Matricea de vizualizare, transmitere catre shader
@@ -147,7 +152,11 @@ void render() {
     zL = radius * sin(sunAngle);
 
     //  dezactiveaza efectul de soare
-    xL = 500.f, yL = 300.f, zL = 400.f;
+    xL = 500.f + xL_inc, yL = -100.f + yL_inc, zL = 400.f + zL_inc;
+    xL = obsX, yL = obsY, zL = obsZ;
+    xL = 50.f;
+    yL = 0.f;
+    zL = 100.f;
 
     float shadowStrength = 4 * daytimeElapsed * (1 - daytimeElapsed);
     shadowStrength = 1.f; // TODO
@@ -164,12 +173,12 @@ void render() {
     matrUmbra[1][1] = zL + D;
     matrUmbra[1][2] = 0;
     matrUmbra[1][3] = 0;
-    matrUmbra[2][0] = -xL;
-    matrUmbra[2][1] = -yL;
+    matrUmbra[2][0] = -yL;
+    matrUmbra[2][1] = -xL;
     matrUmbra[2][2] = D;
     matrUmbra[2][3] = -1;
-    matrUmbra[3][0] = -D * xL;
-    matrUmbra[3][1] = -D * yL;
+    matrUmbra[3][0] = -D * yL;
+    matrUmbra[3][1] = -D * xL;
     matrUmbra[3][2] = -D * zL;
     matrUmbra[3][3] = zL;
     glUniform1f(shadowStrengthLocation, shadowStrength);
@@ -188,7 +197,7 @@ void render() {
 }
 
 void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe_unused]] const int y) {
-    int a = 22;
+    int a = 2222;
     // TODO v
     switch (key) {
         case '-':
@@ -227,6 +236,24 @@ void input_normal(const unsigned char key, [[maybe_unused]] const int x, [[maybe
             break;
         case 'f':
             refZ -= 2.f * cos(alpha);
+            break;
+        case '8':
+            yL_inc += 25.f;
+            break;
+        case '2':
+            yL_inc -= 25.f;
+            break;
+        case '4':
+            xL_inc -= 25.f;
+            break;
+        case '6':
+            xL_inc += 25.f;
+            break;
+        case '1':
+            zL_inc += 25.f;
+            break;
+        case '3':
+            zL_inc -= 25.f;
             break;
         default:
             break;

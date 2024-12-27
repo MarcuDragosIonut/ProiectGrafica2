@@ -8,7 +8,7 @@
 Model::Model(const char *file)
 {
     loadOBJ(file, vertices, uvs, normals);
-    averageNormals();
+    //averageNormals();
 }
 
 Model::~Model()
@@ -36,8 +36,11 @@ void Model::averageNormals() {
         individualNormals[vertex] += normals[i];
     }
     for(auto &v: vertexIndexMap){
+        //std::cout << v.first.x << ' ' << v.first.y << ' ' << v.first.z << " : ";
         for(auto &vertexIndex: v.second){
             normals[vertexIndex] = glm::normalize(individualNormals[v.first]);
+            //std::cout << individualNormals[v.first].x << ' ' << individualNormals[v.first].y << ' ' << individualNormals[v.first].z << '\n';
         }
+        //std::cout << "norm: " << normals[v.second[0]].x << ' ' << normals[v.second[0]].y << ' ' << normals[v.second[0]].z << '\n';
     }
 }
